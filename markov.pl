@@ -26,10 +26,8 @@
 	print "$totalcounter total words.\n";
     my $chain = Algorithm::MarkovChain::->new();
     $chain->seed(symbols => \@symbols, longest => 3);
-    print "About to spew ... \n";
-    print "---\n\n";
     foreach (1 .. 14) {
-        my @newness = $chain->spew(length   => 9,
+        my @newness = $chain->spew(length   => 10,
                                    complete => [ qw(the ) ]);
         print join (" ", @newness), ".\n\n";
     }
