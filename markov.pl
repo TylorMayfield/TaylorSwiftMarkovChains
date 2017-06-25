@@ -3,7 +3,7 @@
     use Path::Class;
     use autodie; 
 	no warnings;
-    my @inputs = qw(wildestdreams.txt 22.txt bothofus.txt badblood.txt eyesopen.txt blankspace.txt trouble.txt shake.txt oursongs.txt never.txt mean.txt callmemaybe.txt lovestory.txt); 
+    my @inputs = qw(wildestdreams.txt 22.txt bothofus.txt badblood.txt eyesopen.txt blankspace.txt trouble.txt shake.txt oursongs.txt never.txt mean.txt lovestory.txt); 
     my $dir = dir("./libs");
     my $f = "";
 	my $totalcounter = 0;
