@@ -1,0 +1,31 @@
+# Perl
+*.swp
+*.bak
+*~
+*.tmp
+
+# Perl local library
+local/
+.carton/
+
+# Build artifacts
+blib/
+pm_to_blib
+MYMETA.*
+MANIFEST.bak
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Generated output
+output.txt
+generated_*.txt
+
