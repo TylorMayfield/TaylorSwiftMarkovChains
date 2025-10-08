@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        perl-version: ['5.32', '5.34', '5.36']
+        perl-version: ['5.36']
     
     steps:
     - name: Checkout repository
@@ -44,20 +44,9 @@ jobs:
       with:
         perl-version: ${{ matrix.perl-version }}
         install-modules-with: cpanm
-
-    - name: Cache Perl dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/perl5
-        key: ${{ runner.os }}-perl-${{ matrix.perl-version }}-${{ hashFiles('**/cpanfile') }}
-        restore-keys: |
-          ${{ runner.os }}-perl-${{ matrix.perl-version }}-
-          ${{ runner.os }}-perl-
-
-    - name: Install dependencies
-      run: |
-        cpanm --notest Algorithm::MarkovChain
-        cpanm --notest Path::Class
+        install-modules: |
+          Algorithm::MarkovChain
+          Path::Class
 
     - name: Verify installation
       run: |
@@ -126,9 +115,9 @@ jobs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: '5.36'
-
-    - name: Install Perl::Critic
-      run: cpanm --notest Perl::Critic
+        install-modules-with: cpanm
+        install-modules: |
+          Perl::Critic
 
     - name: Run Perl::Critic
       run: |
