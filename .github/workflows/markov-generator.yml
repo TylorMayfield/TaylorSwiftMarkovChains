@@ -15,17 +15,6 @@ on:
         description: 'Markov chain length'
         required: false
         default: '3'
-  push:
-    branches: [ main, master ]
-    paths:
-      - 'markov.pl'
-      - 'libs/**'
-      - '.github/workflows/**'
-  pull_request:
-    branches: [ main, master ]
-  schedule:
-    # Run every day at 9:00 AM UTC to generate new lyrics
-    - cron: '0 9 * * *'
 
 jobs:
   generate-text:
