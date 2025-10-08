@@ -84,11 +84,64 @@ Combine options:
 perl markov.pl --lines 30 --length 12 --chain-length 4
 ```
 
+## GitHub Actions Workflow
+
+This project includes an automated GitHub Actions workflow that:
+
+### Triggers
+- **Manual Dispatch**: Run the workflow manually with custom parameters
+- **Push Events**: Automatically runs when code is pushed to main/master
+- **Pull Requests**: Tests changes in PRs
+- **Scheduled**: Runs daily at 9:00 AM UTC to generate fresh lyrics
+
+### Features
+
+#### 🎯 Matrix Testing
+Tests against multiple Perl versions (5.32, 5.34, 5.36) to ensure compatibility.
+
+#### 🎨 Multiple Generation Modes
+- Default generation with standard parameters
+- Custom parameters (when manually triggered)
+- Creative variations (short chain length)
+- Coherent variations (long chain length)
+
+#### 📦 Artifact Storage
+Generated text files are saved as artifacts for 30 days, allowing you to download and review the output.
+
+#### 🔍 Code Quality
+Separate linting job that:
+- Runs Perl::Critic for code quality checks
+- Validates syntax with `perl -c`
+
+### Manual Workflow Dispatch
+
+To run the workflow manually with custom parameters:
+
+1. Go to the **Actions** tab in your GitHub repository
+2. Select **Taylor Swift Markov Chain Generator**
+3. Click **Run workflow**
+4. Enter your custom parameters:
+   - Number of lines to generate
+   - Words per line
+   - Markov chain length
+5. Click **Run workflow**
+
+The workflow will generate text with your specifications and upload the results as downloadable artifacts.
+
+### Viewing Results
+
+After the workflow completes:
+- Check the **Summary** page for a preview of generated text
+- Download artifacts from the workflow run page
+- View the complete output in the job logs
+
 ## Project Structure
 
 ```
 TaylorSwiftMarkovChains/
-├── markov.pl              # Main script
+├── .github/
+│   └── workflows/
+│       └── markov-generator.yml  # GitHub Actions workflow
 ├── libs/                  # Directory containing lyrics files
 │   ├── 22.txt
 │   ├── badblood.txt
@@ -102,7 +155,10 @@ TaylorSwiftMarkovChains/
 │   ├── shake.txt
 │   ├── trouble.txt
 │   └── wildestdreams.txt
-└── README.md             # This file
+├── markov.pl              # Main script
+├── .gitignore             # Git ignore file
+├── EXAMPLE_OUTPUT.md      # Example output documentation
+└── README.md              # This file
 ```
 
 ## Understanding Markov Chains

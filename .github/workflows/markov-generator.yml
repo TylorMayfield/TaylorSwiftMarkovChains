@@ -1,0 +1,139 @@
+name: Taylor Swift Markov Chain Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      lines:
+        description: 'Number of lines to generate'
+        required: false
+        default: '14'
+      length:
+        description: 'Words per line'
+        required: false
+        default: '10'
+      chain_length:
+        description: 'Markov chain length'
+        required: false
+        default: '3'
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'markov.pl'
+      - 'libs/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run every day at 9:00 AM UTC to generate new lyrics
+    - cron: '0 9 * * *'
+
+jobs:
+  generate-text:
+    name: Generate Markov Chain Text
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl-version: ['5.32', '5.34', '5.36']
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Perl ${{ matrix.perl-version }}
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.perl-version }}
+        install-modules-with: cpanm
+
+    - name: Cache Perl dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/perl5
+        key: ${{ runner.os }}-perl-${{ matrix.perl-version }}-${{ hashFiles('**/cpanfile') }}
+        restore-keys: |
+          ${{ runner.os }}-perl-${{ matrix.perl-version }}-
+          ${{ runner.os }}-perl-
+
+    - name: Install dependencies
+      run: |
+        cpanm --notest Algorithm::MarkovChain
+        cpanm --notest Path::Class
+
+    - name: Verify installation
+      run: |
+        perl -MAlgorithm::MarkovChain -e 'print "Algorithm::MarkovChain installed\n"'
+        perl -MPath::Class -e 'print "Path::Class installed\n"'
+
+    - name: Run Markov chain generator (default)
+      run: |
+        perl markov.pl > output_default.txt
+        cat output_default.txt
+
+    - name: Run with custom parameters (workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        perl markov.pl \
+          --lines ${{ github.event.inputs.lines }} \
+          --length ${{ github.event.inputs.length }} \
+          --chain-length ${{ github.event.inputs.chain_length }} \
+          > output_custom.txt
+        cat output_custom.txt
+
+    - name: Generate creative variations
+      run: |
+        echo "=== Short and Creative (chain-length 2) ===" > variations.txt
+        perl markov.pl --lines 10 --length 8 --chain-length 2 >> variations.txt
+        echo "" >> variations.txt
+        echo "=== Long and Coherent (chain-length 5) ===" >> variations.txt
+        perl markov.pl --lines 10 --length 15 --chain-length 5 >> variations.txt
+        cat variations.txt
+
+    - name: Upload generated text as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-lyrics-perl-${{ matrix.perl-version }}
+        path: |
+          output_*.txt
+          variations.txt
+        retention-days: 30
+
+    - name: Create timestamped output
+      run: |
+        TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
+        perl markov.pl --lines 20 > "generated_${TIMESTAMP}.txt"
+        echo "Generated file: generated_${TIMESTAMP}.txt"
+
+    - name: Display summary
+      run: |
+        echo "## Markov Chain Generation Complete! 🎵" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Perl Version:** ${{ matrix.perl-version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Generated Output Preview" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        head -20 output_default.txt >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  lint-perl:
+    name: Lint Perl Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: '5.36'
+
+    - name: Install Perl::Critic
+      run: cpanm --notest Perl::Critic
+
+    - name: Run Perl::Critic
+      run: |
+        perlcritic --brutal markov.pl || true
+
+    - name: Check syntax
+      run: |
+        perl -c markov.pl
